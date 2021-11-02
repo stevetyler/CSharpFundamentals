@@ -9,7 +9,6 @@ namespace CSharpFundamentals
     {
         static void Main(string[] args)
         {
-            
         }
 
         static void FileMethods()
@@ -38,7 +37,7 @@ namespace CSharpFundamentals
         static string SummariseText(string text, int maxLength = 20)
         {
             if (text.Length < maxLength)
-                return(text);
+                return (text);
 
             var words = text.Split(' ');
             var totalChars = 0;
