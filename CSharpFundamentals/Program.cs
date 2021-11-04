@@ -7,8 +7,232 @@ namespace CSharpFundamentals
 {
     class Program
     {
+
         static void Main(string[] args)
         {
+            StopWatch.Init();
+        }
+
+        
+        public class StopWatch
+        {
+            /* Design a class called Stopwatch. 
+             * It should provide two methods: Start and Stop. We call the start method first, and the stop method next. 
+             * Then we ask the stopwatch about the duration between start and stop. 
+             * Duration should be a value in TimeSpan. Display the duration on the console.
+             * We should also be able to use a stopwatch multiple times. So we may start and stop it and then start and stop it again. 
+             * Make sure the duration value each time is calculated properly.
+             * We should not be able to start a stopwatch twice in a row (because that may overwrite the initial start time). 
+             * So the class should throw an InvalidOperationException if its started twice. 
+             */
+
+            private DateTime _startTime;
+            private DateTime _stopTime;
+            private bool _isRunning = false;
+
+
+            public static void Init()
+            {
+                var stopWatch = new StopWatch();
+
+                Console.WriteLine("Welcome to StopWatch");
+                Console.WriteLine("Start - 1 | Stop - 2| Exit - 3");
+
+                while (true)
+                {
+                    var input = Console.ReadLine();
+
+                    if (input == "1")
+                    {
+                        stopWatch.Start();
+                        Console.WriteLine("StopWatch has started!");
+                    }
+                    if (input == "2")
+                    {
+                        Console.WriteLine("StopWatch stopped at {0} ", stopWatch.Stop());
+                    }
+                    if (input == "3")
+                    {
+                        Environment.Exit(1);
+                    }
+                }
+            }
+
+            public void Start()
+            {
+                if (_isRunning)
+                    throw new InvalidOperationException("StopWatch is already running");
+                else
+                {
+                    _startTime = DateTime.Now;
+                    _isRunning = true;
+                }
+            }
+            
+            public TimeSpan Stop()
+            { 
+                if (!_isRunning)
+                    throw new InvalidOperationException("StopWatch has not been started");
+
+                _isRunning = false;
+                _stopTime = DateTime.Now;
+                
+                return _stopTime - _startTime;
+            }
+        }
+
+        public class HttpCookie
+        {
+            private readonly Dictionary<string, string> _dictionary; // could use = new Dictionary()
+            public DateTime Expiry { get; set; }
+
+            public HttpCookie()
+            {
+                _dictionary = new Dictionary<string, string>();
+            }
+
+            public string this[string key] // indexer
+            {
+                get { return _dictionary[key]; }
+                set { _dictionary[key] = value; }
+            }
+        }
+
+        public class Customer
+        {
+            public int Id;
+            public string Name;
+            public readonly List<Order> Orders = new List<Order>(); // allows only 1 list and cannot be overwritten
+
+            public Customer(int id)
+            {
+                this.Id = id;
+            }
+
+            public Customer(int id, string name)
+                : this(id)
+            {
+                this.Name = name;
+            }
+
+            public void Promote()
+            {
+                //Orders = new List<Order>();
+                //....
+            }
+        }
+
+        static void ParseNums()
+        {
+            try
+            {
+                var num = int.Parse("abc");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Conversion failed");
+            }
+
+            int number;
+            var result = int.TryParse("abc", out number);
+            if (result)
+                Console.WriteLine(number);
+            else
+                Console.WriteLine("Conversion failed");
+        }
+
+        static void UseParams()
+        {
+            var calculator = new Calculator();
+            Console.WriteLine(calculator.Add(1, 2, 3, 4, 5));
+            Console.WriteLine(calculator.Add(new int[] { 1, 2, 3, 4, 5 }));
+        }
+
+        public class Calculator
+        {
+            public int Add(params int[] numbers)
+            {
+                var sum = 0;
+                foreach (var number in numbers)
+                {
+                    sum += number;
+                }
+                return sum;
+            }
+        }
+
+        static void UsePoints()
+        {
+            try
+            {
+                var point = new Point(10, 20);
+                point.Move(new Point(40, 60));
+                Console.WriteLine("Point is as at {0}, {1}", point.X, point.Y);
+
+                point.Move(100, 200);
+                Console.WriteLine("Point is as at {0}, {1}", point.X, point.Y);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("An unxpected error occured");
+            }
+        }
+
+        public class Point
+        {
+            public int X;
+            public int Y;
+
+            public Point(int x, int y)
+            {
+                this.X = x;
+                this.Y = y;
+            }
+
+            public void Move(int x, int y)
+            {
+                this.X = x;
+                this.Y = y;
+            }
+
+            public void Move(Point newLocation)
+            {
+                if (newLocation != null)
+                    Move(newLocation.X, newLocation.Y);
+                else
+                    throw new ArgumentNullException("newLocation");
+            }
+        }
+
+        public class Order
+        {
+
+        }
+
+        public class CustomerA
+        {
+            public int Id;
+            public string Name;
+            public List<Order> Orders;
+
+            // lots of constructors - use object initializer instead
+            public CustomerA()
+            {
+                Orders = new List<Order>();
+            }
+
+            public CustomerA(int id)
+                : this()
+            {
+                this.Id = id;
+            }
+
+            public CustomerA(int id, string name)
+                : this(id)
+            {
+                this.Id = id;
+                this.Name = name;
+            }
         }
 
         static void FileMethods()
