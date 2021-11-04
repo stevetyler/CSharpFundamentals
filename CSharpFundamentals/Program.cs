@@ -13,7 +13,6 @@ namespace CSharpFundamentals
             StopWatch.Init();
         }
 
-        
         public class StopWatch
         {
             /* Design a class called Stopwatch. 
@@ -29,7 +28,6 @@ namespace CSharpFundamentals
             private DateTime _startTime;
             private DateTime _stopTime;
             private bool _isRunning = false;
-
 
             public static void Init()
             {
@@ -73,9 +71,9 @@ namespace CSharpFundamentals
             { 
                 if (!_isRunning)
                     throw new InvalidOperationException("StopWatch has not been started");
-
-                _stopTime = DateTime.Now;
-                _isRunning = false;
+                else
+                    _stopTime = DateTime.Now;
+                    _isRunning = false;
 
                 return _stopTime - _startTime;
             }
