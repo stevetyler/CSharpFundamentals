@@ -1,81 +1,141 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace CSharpFundamentals
 
 {
-    class Program
+    partial class Program
     {
 
         static void Main(string[] args)
         {
-            StopWatch.Init();
+            Stack stack = new Stack();
+ 
+            stack.Push(1);
+            stack.Pop();
+            stack.Pop();
         }
 
-        public class StopWatch
+        // Composition
+        public class Installer
         {
-            /* Design a class called Stopwatch. 
-             * It should provide two methods: Start and Stop. We call the start method first, and the stop method next. 
-             * Then we ask the stopwatch about the duration between start and stop. 
-             * Duration should be a value in TimeSpan. Display the duration on the console.
-             * We should also be able to use a stopwatch multiple times. So we may start and stop it and then start and stop it again. 
-             * Make sure the duration value each time is calculated properly.
-             * We should not be able to start a stopwatch twice in a row (because that may overwrite the initial start time). 
-             * So the class should throw an InvalidOperationException if its started twice. 
+            private readonly Logger _logger;
+
+            public Installer(Logger logger)
+            {
+                _logger = logger;
+            }
+
+            public void Install()
+            {
+                _logger.Log("We are installing the application");
+            }
+        }
+
+        public class Logger
+        {
+            public void Log(string message)
+            {
+                Console.WriteLine(message);
+            }
+        }
+
+        public class DbMigrator
+        {
+            /* initialise in constructor
+                var dbMigrator = new DbMigrator(new Logger());
+
+                var logger = new Logger();
+                var installer = new Installer(logger);
+
+                dbMigrator.Migrate();
              */
 
-            private DateTime _startTime;
-            private DateTime _stopTime;
-            private bool _isRunning = false;
+            private readonly Logger _logger;
 
-            public static void Init()
+            public DbMigrator(Logger logger)
             {
-                var stopWatch = new StopWatch();
-
-                Console.WriteLine("Welcome to StopWatch");
-                Console.WriteLine("Start - 1 | Stop - 2| Exit - 3");
-
-                while (true)
-                {
-                    var input = Console.ReadLine();
-
-                    if (input == "1")
-                    {
-                        stopWatch.Start();
-                        Console.WriteLine("StopWatch has started!");
-                    }
-                    if (input == "2")
-                    {
-                        Console.WriteLine("StopWatch stopped at {0} ", stopWatch.Stop());
-                    }
-                    if (input == "3")
-                    {
-                        Environment.Exit(1);
-                    }
-                }
+                _logger = logger;
             }
 
-            public void Start()
+            public void Migrate()
             {
-                if (_isRunning)
-                    throw new InvalidOperationException("StopWatch is already running");
-                else
-                {
-                    _startTime = DateTime.Now;
-                    _isRunning = true;
-                }
+                _logger.Log("We are migrating");
             }
-            
-            public TimeSpan Stop()
-            { 
-                if (!_isRunning)
-                    throw new InvalidOperationException("StopWatch has not been started");
-                else
-                    _stopTime = DateTime.Now;
-                    _isRunning = false;
+        }
 
-                return _stopTime - _startTime;
+
+
+        //// Inheritance
+        //public class Text : PresentationObject
+        //{
+        //    public int FontSize { get; set; }
+        //    public string FontName { get; set; }
+
+        //    public void AddHyperLink(string url)
+        //    {
+        //        Console.WriteLine("We added a link to " + url);
+        //    }
+        //}
+
+        //public class PresentationObject
+        //{
+        //    public int Width { get; set; }
+        //    public int Height { get; set; }
+
+        //    public void Copy()
+        //    {
+        //        Console.WriteLine("Object copied to clipboard");
+        //    }
+
+        //    public void Duplicate()
+        //    {
+        //        Console.WriteLine("Object was duplicated");
+        //    }
+
+        //}
+
+        public class Post
+        {
+            /* Design a class called Post.
+            This class models a StackOverflow post.It should have properties for title, description and the date/time it was created.
+            We should be able to up-vote or down-vote a post.
+            We should also be able to see the current vote value.
+            In the main method, create a post, up-vote and down-vote it a few times and then display the the current vote value.
+            In this exercise, you will learn that a StackOverflow post should provide methods for up-voting and down-voting.
+            You should not give the ability to set the Vote property from the outside, because otherwise, you may accidentally change the votes of a class to 0 or to a random number.
+            And this is how we create bugs in our programs. The class should always protect its state and hide its implementation detail.
+            Educational tip: The aim of this exercise is to help you understand that classes should encapsulate data AND behaviour around that data.
+            Many developers (even those with years of experience) tend to create classes that are purely data containers, and other classes that are purely behaviour (methods) providers.This is not object-oriented programming.
+            This is procedural programming. Such programs are very fragile. Making a change breaks many parts of the code. */
+
+            public string Title;
+            public string Description;
+            public DateTime CreatedDate;
+            private int _voteCount;
+
+            public Post(string title)
+            {
+                this.Title = title;
+                this.CreatedDate = DateTime.Now;
+                this._voteCount = 0;
+            }
+
+            public void UpVote()
+            {
+                this._voteCount += 1;
+            }
+
+            public void DownVote()
+            {
+                this._voteCount -= 1;
+            }
+
+            public void GetVotes()
+            {
+                Console.WriteLine("The post has {0} votes", this._voteCount);
             }
         }
 
@@ -93,30 +153,6 @@ namespace CSharpFundamentals
             {
                 get { return _dictionary[key]; }
                 set { _dictionary[key] = value; }
-            }
-        }
-
-        public class Customer
-        {
-            public int Id;
-            public string Name;
-            public readonly List<Order> Orders = new List<Order>(); // allows only 1 list and cannot be overwritten
-
-            public Customer(int id)
-            {
-                this.Id = id;
-            }
-
-            public Customer(int id, string name)
-                : this(id)
-            {
-                this.Name = name;
-            }
-
-            public void Promote()
-            {
-                //Orders = new List<Order>();
-                //....
             }
         }
 
@@ -396,6 +432,13 @@ namespace CSharpFundamentals
 
         static void ListMethods()
         {
+            // implicitly converted to base class - not typesafe
+            var list = new ArrayList();
+            list.Add(1);
+            list.Add("Steve");
+            list.Add(new Text());
+
+
             // Arrays have a fixed size and length cannot be changed, whereas Lists can be
             var numbers = new List<int>() { 1, 2, 3, 4 };
             numbers.Add(1);
