@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Collections;
 
+
 namespace CSharpFundamentals
 
 {
@@ -11,12 +12,104 @@ namespace CSharpFundamentals
 
         static void Main(string[] args)
         {
-            Stack stack = new Stack();
- 
-            stack.Push(1);
-            stack.Pop();
-            stack.Pop();
+            DateTime wocompletedate = new DateTime(2021, 8, 30);
+            DateTime cp12Date = new DateTime(2021, 11, 3);
+            TimeSpan timeSpan = cp12Date - wocompletedate;
+            DateTime interval = DateTime.MinValue + timeSpan;
+            int month = interval.Month - 1;
+
+            Console.WriteLine("complete date {0}", wocompletedate);
+            Console.WriteLine("complete date {0}", cp12Date);
+            Console.WriteLine("timespan {0}", timeSpan);
+            Console.WriteLine("interval {0}", interval);
+            Console.WriteLine("month {0}", month);
+
         }
+
+        public void UpdateCP12AnniversaryDate()
+        {
+            Entity Incident = this.OrgService.Retrieve(
+                this.Record.LogicalName,
+                this.Record.Id,
+                new ColumnSet(
+                    WorkOrderIncident.CompletedDate,
+                    WorkOrderIncident.StateCode,
+                    WorkOrderIncident.WorkOrder,
+                    WorkOrderIncident.incidentType
+                )
+            );
+            EntityReference incidentType = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.incidentType);
+
+            Entity defaultWorkOrderType = this.OrgService.Retrieve(
+                incidentType.LogicalName,
+                incidentType.Id,
+                new ColumnSet(incidentType.defaultWorkorderType)
+            );
+
+            var isWorkOrderComplete = this.Record.GetAttributeValue<OptionSetValue>(WorkOrderIncident.StatusCode).Value.Equals((int)WorkOrderIncident.StatusCodeOptions.Completed);
+
+            var isLandLord = defaultWorkOrderType.GetAttributeValue<EntityReference>(IncidentType.DefaultWorkOrderType).Id == WorkOrderTypeAttributes.WorkorderTypeGUID.LandLord;
+
+            if (isWorkOrderComplete && isLandLord)
+            {
+                EntityReference workOrderId = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.WorkOrder);
+                Entity workOrder = this.OrgService.Retrieve(workOrderId.LogicalName, workOrderId.Id, new ColumnSet(WorkOrder.ServiceAccount, WorkOrder.WorkOrderType));
+
+
+
+                if (workOrder.Contains(WorkOrder.ServiceAccount))
+                {
+                    EntityReference accountId = workOrder.GetAttributeValue<EntityReference>(WorkOrder.ServiceAccount);
+                    Entity account = this.OrgService.Retrieve(accountId.LogicalName, accountId.Id, new ColumnSet(Account.CP12Date, Account.CP12AnniversaryDate));
+
+
+                    DateTime cp12Date = Convert.ToDateTime(account.GetAttributeValue<DateTime>(Account.CP12Date));
+                    DateTime wocompletedate = DateTime.Today;
+                    if (wocompletedate == Convert.ToDateTime("01-01-0001 00:00:00") && cp12Date == Convert.ToDateTime("01-01-0001 00:00:00"))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        if (cp12Date != Convert.ToDateTime("01-01-0001 00:00:00") && cp12Date != null)
+                        {
+                            if (wocompletedate != Convert.ToDateTime("01-01-0001 00:00:00") && wocompletedate != null)
+                            {
+                                if (wocompletedate.Date <= cp12Date.Date)
+                                {
+                                    TimeSpan timeSpan = cp12Date - wocompletedate;
+                                    DateTime mnth = DateTime.MinValue + timeSpan;
+                                    int month = mnth.Month - 1;
+                                    int day = mnth.Day - 1;
+                                    if (month >= 2 && day > 0 || month > 2)
+                                    {
+                                        account[Account.CP12AnniversaryDate] = wocompletedate.AddMonths(12);
+                                    }
+                                    else
+                                    {
+                                        account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
+                                    }
+                                }
+                                else
+                                {
+                                    account[Account.CP12AnniversaryDate] = wocompletedate.AddMonths(12);
+                                }
+                            }
+                            else
+                            {
+                                account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
+                            }
+                        }
+                        else
+                        {
+                            account[Account.CP12AnniversaryDate] = wocompletedate.AddMonths(12);
+                        }
+                        this.OrgService.Update(account);
+                    }
+                }
+            }
+        }
+
 
         // Composition
         public class Installer
@@ -352,7 +445,9 @@ namespace CSharpFundamentals
             var timeSpan = new TimeSpan(1, 2, 3);
             //var timeSpan1 = new TimeSpan(1, 0, 0);
             //var timeSpan2 = TimeSpan.FromHours(1);
-
+            Console.WriteLine(Convert.ToDateTime("01-01-0001 00:00:00")); // 1/1/0001 12:00:00 AM
+            Console.WriteLine(DateTime.MinValue); // 1/1/0001 12:00:00 AM
+            Console.WriteLine(new DateTime()); // 1/1/0001 12:00:00 AM
 
             var start = DateTime.Now;
             var end = DateTime.Now.AddMinutes(2);
@@ -436,7 +531,7 @@ namespace CSharpFundamentals
             var list = new ArrayList();
             list.Add(1);
             list.Add("Steve");
-            list.Add(new Text());
+            //list.Add(new Text());
 
 
             // Arrays have a fixed size and length cannot be changed, whereas Lists can be

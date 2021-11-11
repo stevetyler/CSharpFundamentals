@@ -1,20 +1,21 @@
-﻿namespace CSharpFundamentals
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Collections;
+
+namespace CSharpFundamentals
 
 {
     partial class Program
     {
-        public class Shape
-        {
-            public int Height { get; set; }
-            public int Width { get; set; }
-            public int X { get; set; }
-            public int Y { get; set; }
+        //public class Shape
+        //{
+        //    public int Height { get; set; }
+        //    public int Width { get; set; }
+        //    public Position Position { get; set; }
 
-            public void Draw()
-            {
-
-            }
-        }
+        //    public ShapeType Type { get; set; }
+        //}
     }
 }
 
