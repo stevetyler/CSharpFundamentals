@@ -12,13 +12,13 @@ namespace CSharpFundamentals
 
         static void Main(string[] args)
         {
-            DateTime wocompletedate = new DateTime(2021, 8, 30);
+            DateTime woCompleteDate = new DateTime(2021, 8, 30);
             DateTime cp12Date = new DateTime(2021, 11, 3);
-            TimeSpan timeSpan = cp12Date - wocompletedate;
+            TimeSpan timeSpan = cp12Date - woCompleteDate;
             DateTime interval = DateTime.MinValue + timeSpan;
             int month = interval.Month - 1;
 
-            Console.WriteLine("complete date {0}", wocompletedate);
+            Console.WriteLine("complete date {0}", woCompleteDate);
             Console.WriteLine("complete date {0}", cp12Date);
             Console.WriteLine("timespan {0}", timeSpan);
             Console.WriteLine("interval {0}", interval);
@@ -31,12 +31,7 @@ namespace CSharpFundamentals
             Entity Incident = this.OrgService.Retrieve(
                 this.Record.LogicalName,
                 this.Record.Id,
-                new ColumnSet(
-                    WorkOrderIncident.CompletedDate,
-                    WorkOrderIncident.StateCode,
-                    WorkOrderIncident.WorkOrder,
-                    WorkOrderIncident.incidentType
-                )
+                new ColumnSet(WorkOrderIncident.CompletedDate, WorkOrderIncident.StateCode, WorkOrderIncident.WorkOrder, WorkOrderIncident.incidentType)
             );
             EntityReference incidentType = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.incidentType);
 
@@ -52,58 +47,56 @@ namespace CSharpFundamentals
 
             if (isWorkOrderComplete && isLandLord)
             {
-                EntityReference workOrderId = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.WorkOrder);
-                Entity workOrder = this.OrgService.Retrieve(workOrderId.LogicalName, workOrderId.Id, new ColumnSet(WorkOrder.ServiceAccount, WorkOrder.WorkOrderType));
-
-
+                var workOrderId = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.WorkOrder);
+                Entity workOrder = this.OrgService.Retrieve(
+                    workOrderId.LogicalName,
+                    workOrderId.Id,
+                    new ColumnSet(WorkOrder.ServiceAccount, WorkOrder.WorkOrderType)
+                );
 
                 if (workOrder.Contains(WorkOrder.ServiceAccount))
                 {
-                    EntityReference accountId = workOrder.GetAttributeValue<EntityReference>(WorkOrder.ServiceAccount);
-                    Entity account = this.OrgService.Retrieve(accountId.LogicalName, accountId.Id, new ColumnSet(Account.CP12Date, Account.CP12AnniversaryDate));
+                    var accountId = workOrder.GetAttributeValue<EntityReference>(WorkOrder.ServiceAccount);
+                    Entity account = this.OrgService.Retrieve(
+                        accountId.LogicalName,
+                        accountId.Id,
+                        new ColumnSet(Account.CP12Date, Account.CP12AnniversaryDate));
 
+                    var cp12Date = Convert.ToDateTime(account.GetAttributeValue<DateTime>(Account.CP12Date));
+                    var woCompleteDate = DateTime.Today;
+                    var defaultDate = Convert.ToDateTime("01-01-0001 00:00:00");
+                    var hasCp12Date = cp12Date != defaultDate && cp12Date != null;
+                    var hasWoCompleteDate = woCompleteDate != defaultDate && woCompleteDate != null;
+                    var hasNoDatesSet = woCompleteDate == defaultDate && cp12Date == defaultDate;
+                    var hasWoCompleteDateAndCp12Date = hasCp12Date && hasWoCompleteDate;
+                    var hasWoCompleteDateBeforeOrEqualCp12Date = hasWoCompleteDateAndCp12Date && (woCompleteDate.Date <= cp12Date.Date);
+                    var hasWoCompleteDateAfterCp12Date = !hasWoCompleteDateBeforeOrEqualCp12Date;
 
-                    DateTime cp12Date = Convert.ToDateTime(account.GetAttributeValue<DateTime>(Account.CP12Date));
-                    DateTime wocompletedate = DateTime.Today;
-                    if (wocompletedate == Convert.ToDateTime("01-01-0001 00:00:00") && cp12Date == Convert.ToDateTime("01-01-0001 00:00:00"))
+                    TimeSpan timeDifference = cp12Date - woCompleteDate;
+                    DateTime mnth = DateTime.MinValue + timeDifference;
+                    int month = mnth.Month - 1;
+                    int day = mnth.Day - 1;
+                    var hasTimeDiffGreatherThan2Months = month >= 2 && day > 0 || month > 2;
+
+                    if (hasNoDatesSet)
                     {
                         return;
                     }
                     else
                     {
-                        if (cp12Date != Convert.ToDateTime("01-01-0001 00:00:00") && cp12Date != null)
+                        if (
+                            !hasCp12Date ||
+                            hasWoCompleteDateAfterCp12Date ||
+                            (hasWoCompleteDateBeforeOrEqualCp12Date && hasTimeDiffGreatherThan2Months)
+                        )
                         {
-                            if (wocompletedate != Convert.ToDateTime("01-01-0001 00:00:00") && wocompletedate != null)
-                            {
-                                if (wocompletedate.Date <= cp12Date.Date)
-                                {
-                                    TimeSpan timeSpan = cp12Date - wocompletedate;
-                                    DateTime mnth = DateTime.MinValue + timeSpan;
-                                    int month = mnth.Month - 1;
-                                    int day = mnth.Day - 1;
-                                    if (month >= 2 && day > 0 || month > 2)
-                                    {
-                                        account[Account.CP12AnniversaryDate] = wocompletedate.AddMonths(12);
-                                    }
-                                    else
-                                    {
-                                        account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
-                                    }
-                                }
-                                else
-                                {
-                                    account[Account.CP12AnniversaryDate] = wocompletedate.AddMonths(12);
-                                }
-                            }
-                            else
-                            {
-                                account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
-                            }
+                            account[Account.CP12AnniversaryDate] = woCompleteDate.AddMonths(12);
                         }
                         else
                         {
-                            account[Account.CP12AnniversaryDate] = wocompletedate.AddMonths(12);
+                            account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
                         }
+
                         this.OrgService.Update(account);
                     }
                 }
