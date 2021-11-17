@@ -1,21 +1,15 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Collections;
-
-namespace CSharpFundamentals
+﻿namespace CSharpFundamentals
 
 {
-    partial class Program
+    public abstract class Shape
     {
-        //public class Shape
-        //{
-        //    public int Height { get; set; }
-        //    public int Width { get; set; }
-        //    public Position Position { get; set; }
+        // abstract class cannot be instantiated
 
-        //    public ShapeType Type { get; set; }
-        //}
+        public int Height { get; set; }
+        public int Width { get; set; }
+        //public Position Position { get; set; }
+
+        public abstract void Draw(); // has to implement in derived class
     }
 }
-
+ 

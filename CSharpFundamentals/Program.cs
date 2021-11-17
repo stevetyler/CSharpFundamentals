@@ -12,96 +12,93 @@ namespace CSharpFundamentals
 
         static void Main(string[] args)
         {
-            DateTime woCompleteDate = new DateTime(2021, 8, 30);
-            DateTime cp12Date = new DateTime(2021, 11, 3);
-            TimeSpan timeSpan = cp12Date - woCompleteDate;
-            DateTime interval = DateTime.MinValue + timeSpan;
-            int month = interval.Month - 1;
+            //var invalidConnection = new SqlConnection(" ");
+            var mySqlConnection = new SqlConnection("sql://mysql.com");
+            var newSqlCommand = new DbCommand(mySqlConnection, "create new SQL table");
+            newSqlCommand.Execute();
 
-            Console.WriteLine("complete date {0}", woCompleteDate);
-            Console.WriteLine("complete date {0}", cp12Date);
-            Console.WriteLine("timespan {0}", timeSpan);
-            Console.WriteLine("interval {0}", interval);
-            Console.WriteLine("month {0}", month);
 
+            var myOracleConnection = new OracleConnection("oracle://myoracle.com");
+            var newOracleCommand = new DbCommand(myOracleConnection, "create new Oracle table");
+            newOracleCommand.Execute();
         }
 
-        public void UpdateCP12AnniversaryDate()
-        {
-            Entity Incident = this.OrgService.Retrieve(
-                this.Record.LogicalName,
-                this.Record.Id,
-                new ColumnSet(WorkOrderIncident.CompletedDate, WorkOrderIncident.StateCode, WorkOrderIncident.WorkOrder, WorkOrderIncident.incidentType)
-            );
-            EntityReference incidentType = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.incidentType);
+        //public void UpdateCP12AnniversaryDate()
+        //{
+        //    Entity Incident = this.OrgService.Retrieve(
+        //        this.Record.LogicalName,
+        //        this.Record.Id,
+        //        new ColumnSet(WorkOrderIncident.CompletedDate, WorkOrderIncident.StateCode, WorkOrderIncident.WorkOrder, WorkOrderIncident.incidentType)
+        //    );
+        //    EntityReference incidentType = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.incidentType);
 
-            Entity defaultWorkOrderType = this.OrgService.Retrieve(
-                incidentType.LogicalName,
-                incidentType.Id,
-                new ColumnSet(incidentType.defaultWorkorderType)
-            );
+        //    Entity defaultWorkOrderType = this.OrgService.Retrieve(
+        //        incidentType.LogicalName,
+        //        incidentType.Id,
+        //        new ColumnSet(incidentType.defaultWorkorderType)
+        //    );
 
-            var isWorkOrderComplete = this.Record.GetAttributeValue<OptionSetValue>(WorkOrderIncident.StatusCode).Value.Equals((int)WorkOrderIncident.StatusCodeOptions.Completed);
+        //    var isWorkOrderComplete = this.Record.GetAttributeValue<OptionSetValue>(WorkOrderIncident.StatusCode).Value.Equals((int)WorkOrderIncident.StatusCodeOptions.Completed);
 
-            var isLandLord = defaultWorkOrderType.GetAttributeValue<EntityReference>(IncidentType.DefaultWorkOrderType).Id == WorkOrderTypeAttributes.WorkorderTypeGUID.LandLord;
+        //    var isLandLord = defaultWorkOrderType.GetAttributeValue<EntityReference>(IncidentType.DefaultWorkOrderType).Id == WorkOrderTypeAttributes.WorkorderTypeGUID.LandLord;
 
-            if (isWorkOrderComplete && isLandLord)
-            {
-                var workOrderId = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.WorkOrder);
-                Entity workOrder = this.OrgService.Retrieve(
-                    workOrderId.LogicalName,
-                    workOrderId.Id,
-                    new ColumnSet(WorkOrder.ServiceAccount, WorkOrder.WorkOrderType)
-                );
+        //    if (isWorkOrderComplete && isLandLord)
+        //    {
+        //        var workOrderId = Incident.GetAttributeValue<EntityReference>(WorkOrderIncident.WorkOrder);
+        //        Entity workOrder = this.OrgService.Retrieve(
+        //            workOrderId.LogicalName,
+        //            workOrderId.Id,
+        //            new ColumnSet(WorkOrder.ServiceAccount, WorkOrder.WorkOrderType)
+        //        );
 
-                if (workOrder.Contains(WorkOrder.ServiceAccount))
-                {
-                    var accountId = workOrder.GetAttributeValue<EntityReference>(WorkOrder.ServiceAccount);
-                    Entity account = this.OrgService.Retrieve(
-                        accountId.LogicalName,
-                        accountId.Id,
-                        new ColumnSet(Account.CP12Date, Account.CP12AnniversaryDate));
+        //        if (workOrder.Contains(WorkOrder.ServiceAccount))
+        //        {
+        //            var accountId = workOrder.GetAttributeValue<EntityReference>(WorkOrder.ServiceAccount);
+        //            Entity account = this.OrgService.Retrieve(
+        //                accountId.LogicalName,
+        //                accountId.Id,
+        //                new ColumnSet(Account.CP12Date, Account.CP12AnniversaryDate));
 
-                    var cp12Date = Convert.ToDateTime(account.GetAttributeValue<DateTime>(Account.CP12Date));
-                    var woCompleteDate = DateTime.Today;
-                    var defaultDate = Convert.ToDateTime("01-01-0001 00:00:00");
-                    var hasCp12Date = cp12Date != defaultDate && cp12Date != null;
-                    var hasWoCompleteDate = woCompleteDate != defaultDate && woCompleteDate != null;
-                    var hasNoDatesSet = woCompleteDate == defaultDate && cp12Date == defaultDate;
-                    var hasWoCompleteDateAndCp12Date = hasCp12Date && hasWoCompleteDate;
-                    var hasWoCompleteDateBeforeOrEqualCp12Date = hasWoCompleteDateAndCp12Date && (woCompleteDate.Date <= cp12Date.Date);
-                    var hasWoCompleteDateAfterCp12Date = !hasWoCompleteDateBeforeOrEqualCp12Date;
+        //            var cp12Date = Convert.ToDateTime(account.GetAttributeValue<DateTime>(Account.CP12Date));
+        //            var woCompleteDate = DateTime.Today;
+        //            var defaultDate = Convert.ToDateTime("01-01-0001 00:00:00");
+        //            var hasCp12Date = cp12Date != defaultDate && cp12Date != null;
+        //            var hasWoCompleteDate = woCompleteDate != defaultDate && woCompleteDate != null;
+        //            var hasNoDatesSet = woCompleteDate == defaultDate && cp12Date == defaultDate;
+        //            var hasWoCompleteDateAndCp12Date = hasCp12Date && hasWoCompleteDate;
+        //            var hasWoCompleteDateBeforeOrEqualCp12Date = hasWoCompleteDateAndCp12Date && (woCompleteDate.Date <= cp12Date.Date);
+        //            var hasWoCompleteDateAfterCp12Date = !hasWoCompleteDateBeforeOrEqualCp12Date;
 
-                    TimeSpan timeDifference = cp12Date - woCompleteDate;
-                    DateTime mnth = DateTime.MinValue + timeDifference;
-                    int month = mnth.Month - 1;
-                    int day = mnth.Day - 1;
-                    var hasTimeDiffGreatherThan2Months = month >= 2 && day > 0 || month > 2;
+        //            TimeSpan timeDifference = cp12Date - woCompleteDate;
+        //            DateTime mnth = DateTime.MinValue + timeDifference;
+        //            int month = mnth.Month - 1;
+        //            int day = mnth.Day - 1;
+        //            var hasTimeDiffGreatherThan2Months = month >= 2 && day > 0 || month > 2;
 
-                    if (hasNoDatesSet)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        if (
-                            !hasCp12Date ||
-                            hasWoCompleteDateAfterCp12Date ||
-                            (hasWoCompleteDateBeforeOrEqualCp12Date && hasTimeDiffGreatherThan2Months)
-                        )
-                        {
-                            account[Account.CP12AnniversaryDate] = woCompleteDate.AddMonths(12);
-                        }
-                        else
-                        {
-                            account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
-                        }
+        //            if (hasNoDatesSet)
+        //            {
+        //                return;
+        //            }
+        //            else
+        //            {
+        //                if (
+        //                    !hasCp12Date ||
+        //                    hasWoCompleteDateAfterCp12Date ||
+        //                    (hasWoCompleteDateBeforeOrEqualCp12Date && hasTimeDiffGreatherThan2Months)
+        //                )
+        //                {
+        //                    account[Account.CP12AnniversaryDate] = woCompleteDate.AddMonths(12);
+        //                }
+        //                else
+        //                {
+        //                    account[Account.CP12AnniversaryDate] = cp12Date.AddMonths(12);
+        //                }
 
-                        this.OrgService.Update(account);
-                    }
-                }
-            }
-        }
+        //                this.OrgService.Update(account);
+        //            }
+        //        }
+        //    }
+        //}
 
 
         // Composition
@@ -149,79 +146,6 @@ namespace CSharpFundamentals
             public void Migrate()
             {
                 _logger.Log("We are migrating");
-            }
-        }
-
-
-
-        //// Inheritance
-        //public class Text : PresentationObject
-        //{
-        //    public int FontSize { get; set; }
-        //    public string FontName { get; set; }
-
-        //    public void AddHyperLink(string url)
-        //    {
-        //        Console.WriteLine("We added a link to " + url);
-        //    }
-        //}
-
-        //public class PresentationObject
-        //{
-        //    public int Width { get; set; }
-        //    public int Height { get; set; }
-
-        //    public void Copy()
-        //    {
-        //        Console.WriteLine("Object copied to clipboard");
-        //    }
-
-        //    public void Duplicate()
-        //    {
-        //        Console.WriteLine("Object was duplicated");
-        //    }
-
-        //}
-
-        public class Post
-        {
-            /* Design a class called Post.
-            This class models a StackOverflow post.It should have properties for title, description and the date/time it was created.
-            We should be able to up-vote or down-vote a post.
-            We should also be able to see the current vote value.
-            In the main method, create a post, up-vote and down-vote it a few times and then display the the current vote value.
-            In this exercise, you will learn that a StackOverflow post should provide methods for up-voting and down-voting.
-            You should not give the ability to set the Vote property from the outside, because otherwise, you may accidentally change the votes of a class to 0 or to a random number.
-            And this is how we create bugs in our programs. The class should always protect its state and hide its implementation detail.
-            Educational tip: The aim of this exercise is to help you understand that classes should encapsulate data AND behaviour around that data.
-            Many developers (even those with years of experience) tend to create classes that are purely data containers, and other classes that are purely behaviour (methods) providers.This is not object-oriented programming.
-            This is procedural programming. Such programs are very fragile. Making a change breaks many parts of the code. */
-
-            public string Title;
-            public string Description;
-            public DateTime CreatedDate;
-            private int _voteCount;
-
-            public Post(string title)
-            {
-                this.Title = title;
-                this.CreatedDate = DateTime.Now;
-                this._voteCount = 0;
-            }
-
-            public void UpVote()
-            {
-                this._voteCount += 1;
-            }
-
-            public void DownVote()
-            {
-                this._voteCount -= 1;
-            }
-
-            public void GetVotes()
-            {
-                Console.WriteLine("The post has {0} votes", this._voteCount);
             }
         }
 
